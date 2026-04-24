@@ -48,7 +48,7 @@ export function RoomClient({
   currentUserId,
 }: {
   room: { id: string; name: string; homeId: string };
-  home: { id: string; name: string; ownerId: string };
+  home: { id: string; name: string; ownerId: string; type: "HOME" | "SINGLE_ROOM" };
   initialItems: RoomItem[];
   currency: string;
   currentUserId: string;
@@ -60,7 +60,34 @@ export function RoomClient({
   const [addOpen, setAddOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<RoomItem | null>(null);
   const [renameOpen, setRenameOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const canDeleteRoom =
+    home.ownerId === currentUserId && home.type !== "SINGLE_ROOM";
+
+  async function deleteRoom() {
+    if (
+      !confirm(
+        `Delete "${roomName}" and all its items? This can't be undone.`,
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/rooms/${room.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data?.error ?? "Couldn't delete the room.");
+        return;
+      }
+      router.push(`/home/${home.id}`);
+      router.refresh();
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   const { subtotal, purchasedTotal, pendingCount, purchasedCount } = useMemo(
     () =>
@@ -166,7 +193,7 @@ export function RoomClient({
           <p className="text-sm text-surface-subtle dark:text-night-subtle">
             In {home.name}
           </p>
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1 flex items-center gap-1">
             <h1 className="heading text-4xl font-semibold tracking-tight">
               {roomName}
             </h1>
@@ -179,6 +206,18 @@ export function RoomClient({
             >
               <Pencil className="h-4 w-4" />
             </button>
+            {canDeleteRoom ? (
+              <button
+                type="button"
+                onClick={deleteRoom}
+                disabled={deleting}
+                className="grid h-8 w-8 place-items-center rounded-full text-surface-muted transition hover:bg-red-500/10 hover:text-red-600 disabled:opacity-50 dark:text-night-muted dark:hover:text-red-300"
+                aria-label="Delete room"
+                title="Delete room"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            ) : null}
           </div>
           <p className="mt-2 text-sm text-surface-subtle dark:text-night-subtle">
             {pendingCount} to buy

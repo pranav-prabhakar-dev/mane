@@ -33,7 +33,7 @@ export default async function RoomPage({
     where: { id },
     include: {
       home: {
-        select: { id: true, name: true, ownerId: true },
+        select: { id: true, name: true, ownerId: true, type: true },
       },
       items: {
         orderBy: { createdAt: "desc" },
@@ -68,6 +68,7 @@ export default async function RoomPage({
             id: room.home.id,
             name: room.home.name,
             ownerId: room.home.ownerId,
+            type: room.home.type,
           }}
           initialItems={room.items.map((it) => ({
             id: it.id,
