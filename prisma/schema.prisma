@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------- Auth (Auth.js) --------------------
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  currency      String    @default("USD")
+  onboardedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  accounts     Account[]
+  sessions     Session[]
+  ownedHomes   Home[]        @relation("HomeOwner")
+  memberships  HomeMember[]
+  items        Item[]
+  joinRequests JoinRequest[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// -------------------- Domain --------------------
+enum HomeType {
+  HOME
+  SINGLE_ROOM
+}
+
+model Home {
+  id        String   @id @default(cuid())
+  name      String
+  joinCode  String   @unique
+  type      HomeType @default(HOME)
+  ownerId   String
+  createdAt DateTime @default(now())
+
+  owner    User          @relation("HomeOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members  HomeMember[]
+  rooms    Room[]
+  requests JoinRequest[]
+}
+
+model HomeMember {
+  id       String   @id @default(cuid())
+  homeId   String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  home Home @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([homeId, userId])
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model JoinRequest {
+  id        String        @id @default(cuid())
+  homeId    String
+  userId    String
+  status    RequestStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  home Home @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([homeId, userId])
+}
+
+model Room {
+  id        String   @id @default(cuid())
+  name      String
+  homeId    String
+  createdAt DateTime @default(now())
+
+  home  Home   @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  items Item[]
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String
+  url         String?
+  imageUrl    String?
+  price       Float?
+  currency    String?
+  quantity    Int      @default(1)
+  optional    Boolean  @default(false)
+  purchasedAt DateTime?
+  description String?
+  roomId      String
+  addedById   String
+  createdAt   DateTime @default(now())
+
+  room    Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  addedBy User @relation(fields: [addedById], references: [id], onDelete: Cascade)
+}

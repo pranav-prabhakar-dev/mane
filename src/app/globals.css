@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background-color: theme("colors.surface.DEFAULT");
+  color: theme("colors.surface.text");
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.dark body {
+  background-color: theme("colors.night.DEFAULT");
+  color: theme("colors.night.text");
+}
+
+/* Subtle radial warmth in light mode; subtle in dark */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      1200px 700px at 85% -10%,
+      rgba(235, 106, 31, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 600px at -10% 110%,
+      rgba(235, 106, 31, 0.05),
+      transparent 55%
+    );
+  z-index: 0;
+}
+.dark body::before {
+  background:
+    radial-gradient(
+      1200px 700px at 85% -10%,
+      rgba(235, 106, 31, 0.11),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 600px at -10% 110%,
+      rgba(235, 106, 31, 0.06),
+      transparent 55%
+    );
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-raised dark:bg-night-raised border border-surface-border dark:border-night-border rounded-2xl shadow-tile;
+  }
+  .input {
+    @apply w-full rounded-xl border border-surface-border dark:border-night-border bg-white/70 dark:bg-night-sunken/70 px-4 py-2.5 text-[15px] text-surface-text dark:text-night-text placeholder:text-surface-muted dark:placeholder:text-night-muted outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-400/30;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700 shadow-sm;
+  }
+  .btn-ghost {
+    @apply btn text-surface-text dark:text-night-text hover:bg-surface-sunken dark:hover:bg-night-sunken;
+  }
+  .btn-outline {
+    @apply btn border border-surface-border dark:border-night-border bg-surface-raised/60 dark:bg-night-raised/60 text-surface-text dark:text-night-text hover:bg-surface-sunken dark:hover:bg-night-sunken;
+  }
+  .btn-danger {
+    @apply btn text-red-700 dark:text-red-300 hover:bg-red-500/10;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1 rounded-full bg-brand-100 text-brand-700 px-2.5 py-0.5 text-xs font-medium dark:bg-brand-500/15 dark:text-brand-300;
+  }
+  .tile {
+    @apply card p-6 flex flex-col items-center justify-center transition hover:shadow-tileHover hover:-translate-y-0.5 active:translate-y-0;
+  }
+  .heading {
+    @apply font-display tracking-tight;
+  }
+}
+
+/* Headings default to Lora */
+h1, h2, h3, h4 {
+  font-family: var(--font-lora), Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+/* Scrollbar polish (webkit) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Prevent FOUC for theme */
+html {
+  background-color: theme("colors.surface.DEFAULT");
+}
+html.dark {
+  background-color: theme("colors.night.DEFAULT");
+}
+
+/* Scroll-shadow: subtle fade at the edges of a scrollable container
+   that signals "there's more to scroll to". Disappears automatically
+   when content is fully visible or scrolled to the end. */
+.mane-modal-scroll {
+  background:
+    /* top shadow — anchored to viewport top */
+    linear-gradient(to bottom, theme("colors.surface.raised") 30%, rgba(251, 249, 245, 0)) top / 100% 24px no-repeat,
+    /* bottom shadow — anchored to viewport bottom */
+    linear-gradient(to top, theme("colors.surface.raised") 30%, rgba(251, 249, 245, 0)) bottom / 100% 24px no-repeat,
+    /* top hint gradient — scrolls with content */
+    radial-gradient(farthest-side at 50% 0, rgba(24, 22, 18, 0.08), transparent) top / 100% 14px no-repeat,
+    /* bottom hint gradient — scrolls with content */
+    radial-gradient(farthest-side at 50% 100%, rgba(24, 22, 18, 0.08), transparent) bottom / 100% 14px no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.dark .mane-modal-scroll {
+  background:
+    linear-gradient(to bottom, theme("colors.night.raised") 30%, rgba(36, 35, 32, 0)) top / 100% 24px no-repeat,
+    linear-gradient(to top, theme("colors.night.raised") 30%, rgba(36, 35, 32, 0)) bottom / 100% 24px no-repeat,
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.35), transparent) top / 100% 14px no-repeat,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.35), transparent) bottom / 100% 14px no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Soft crossfade between light/dark.
+   Narrowly scoped — only the page surfaces, cards, inputs, and pills
+   transition. Applying `transition: ... !important` to every DOM node
+   is expensive on iOS Safari and can make the toggle feel frozen.
+   Text/icons snap (animating `color` through intermediate shades makes
+   anti-aliased glyphs shimmer). */
+html.theme-switching,
+html.theme-switching body,
+html.theme-switching body::before,
+html.theme-switching .card,
+html.theme-switching .tile,
+html.theme-switching .input,
+html.theme-switching .pill,
+html.theme-switching .btn-outline,
+html.theme-switching .btn-ghost,
+html.theme-switching .mane-modal-scroll,
+html.theme-switching header,
+html.theme-switching footer {
+  transition:
+    background-color 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}

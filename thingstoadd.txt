@@ -1,0 +1,5 @@
+1. after adding an item, let the item show the date & time when it was added
+2. give a "item purchased" option after say a user buys something in the list, remove it from subtotal, put a green tick (ig) next to the one where the purchase is done
+3. a button/option for "optional" choice, so that users can differentiate between necessities and optional extras. a checkbox in the main "room" page to see how much it would cost with/without extras
+4. generate more alphanumeric codes (prefreably 6 or 7 digits) for joining houses so that it looks more "safe" than a catchphrase like that
+5. fix spacing in the big text of landing page when logged out
