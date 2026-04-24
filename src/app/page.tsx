@@ -48,7 +48,16 @@ export default async function LandingPage() {
       </section>
 
       <footer className="px-8 pb-6 text-center text-sm text-surface-muted dark:text-night-muted">
-        Made with warmth. Mané.
+        Made with warmth by{" "}
+        <a
+          href="https://github.com/pranav-prabhakar-dev"
+          target="_blank"
+          rel="noreferrer"
+          className="underline-offset-4 transition-colors hover:text-brand-600 hover:underline dark:hover:text-brand-400"
+        >
+          Pranav Prabhakar
+        </a>
+        .
       </footer>
     </main>
   );
